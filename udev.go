@@ -181,7 +181,7 @@ func (m *Monitor) ReceiveDevice() *Device {
 }
 
 func (m *Monitor) AddFilter(subsystem string, devtype string) error {
-	err := nil
+	var err error
 	if len(devtype) == 0 {
 		err := C.udev_monitor_filter_add_match_subsystem_devtype(m.ptr, C.CString(subsystem), nil)
 	} else {
