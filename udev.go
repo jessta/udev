@@ -1,10 +1,10 @@
 package udev
 
 /*
-  #cgo LDFLAGS: -ludev
-  #include <libudev.h>
-  #include <linux/types.h>
-  #include <stdlib.h>
+#cgo LDFLAGS: -ludev
+#include <libudev.h>
+#include <linux/types.h>
+#include <stdlib.h>
 */
 import "C"
 import "unsafe"
@@ -41,12 +41,11 @@ func (u *Udev) Unref() {
 
 func NewUdev() *Udev {
 	u := C.udev_new()
-	return &Udev{u}
+	if u != nil {
+		return &Udev{u}
+	}
+	return nil
 }
-
-// func (u Udev) SetLogger() {
-// 	C.udev_set_log_fn(u.ptr)
-// }
 
 func (u *Udev) GetUserdata() unsafe.Pointer {
 	return C.udev_get_userdata(u.ptr)
@@ -57,31 +56,51 @@ func (u *Udev) SetUserdata(userdata unsafe.Pointer) {
 }
 
 func (d *Device) Udev() *Udev {
-	return &Udev{C.udev_device_get_udev(d.ptr)}
+	u := C.udev_device_get_udev(d.ptr)
+	if u != nil {
+		return &Udev{u}
+	}
+	return nil
 }
 
 func (u *Udev) DeviceFromSysPath(syspath string) *Device {
-	return &Device{C.udev_device_new_from_syspath(u.ptr, C.CString(syspath))}
+	d := C.udev_device_new_from_syspath(u.ptr, C.CString(syspath))
+	if d != nil {
+		return &Device{d}
+	}
+	return nil
 }
 
 func DeviceFromDevNum(u *Udev, t DeviceType, num DevNum) *Device {
-	return &Device{C.udev_device_new_from_devnum(u.ptr, C.char(t), C.dev_t(num))}
+	d := C.udev_device_new_from_devnum(u.ptr, C.char(t), C.dev_t(num))
+	if d != nil {
+		return &Device{d}
+	}
+	return nil
 }
 
 func (u *Udev) NewDeviceFromSubsystemSysName(subsystem string, sysname string) *Device {
-	return &Device{C.udev_device_new_from_subsystem_sysname(u.ptr, C.CString(subsystem), C.CString(sysname))}
+	d := C.udev_device_new_from_subsystem_sysname(u.ptr, C.CString(subsystem), C.CString(sysname))
+	if d != nil {
+		return &Device{d}
+	}
+	return nil
 }
 
 func (d *Device) Parent() *Device {
-	return &Device{C.udev_device_get_parent(d.ptr)}
-}
-
-func (d *Device) IsNil() bool {
-	return d.ptr == nil
+	p := C.udev_device_get_parent(d.ptr)
+	if p != nil {
+		return &Device{p}
+	}
+	return nil
 }
 
 func (d *Device) ParentWithSubsystemDevType(subsystem string, devType string) *Device {
-	return &Device{C.udev_device_get_parent_with_subsystem_devtype(d.ptr, C.CString(subsystem), C.CString(devType))}
+	p := C.udev_device_get_parent_with_subsystem_devtype(d.ptr, C.CString(subsystem), C.CString(devType))
+	if p != nil {
+		return &Device{p}
+	}
+	return nil
 }
 
 func (d *Device) DevPath() string {
@@ -145,7 +164,11 @@ func (m *Monitor) Unref() {
 }
 
 func (m *Monitor) Udev() *Udev {
-	return &Udev{C.udev_monitor_get_udev(m.ptr)}
+	u := C.udev_monitor_get_udev(m.ptr)
+	if u != nil {
+		return &Udev{u}
+	}
+	return nil
 }
 
 func NewMonitorFromNetlink(u *Udev, name string) *Monitor {
@@ -169,7 +192,11 @@ func (m *Monitor) Fd() error {
 }
 
 func (m *Monitor) ReceiveDevice() *Device {
-	return &Device{C.udev_monitor_receive_device(m.ptr)}
+	d := C.udev_monitor_receive_device(m.ptr)
+	if d != nil {
+		return &Device{d}
+	}
+	return nil
 }
 
 func (m *Monitor) AddFilter(subsystem string, devtype string) error {
@@ -213,11 +240,19 @@ func (q *Queue) Unref() {
 	C.udev_queue_unref(q.ptr)
 }
 func (q *Queue) Udev() *Udev {
-	return &Udev{C.udev_queue_get_udev(q.ptr)}
+	u := C.udev_queue_get_udev(q.ptr)
+	if u != nil {
+		return &Udev{u}
+	}
+	return nil
 }
 
 func (u *Udev) NewQueue() *Queue {
-	return &Queue{C.udev_queue_new(u.ptr)}
+	q := C.udev_queue_new(u.ptr)
+	if q != nil {
+		return &Queue{q}
+	}
+	return nil
 }
 
 func (q *Queue) IsActive() bool {
@@ -243,11 +278,19 @@ func (e *Enumerate) Unref() {
 }
 
 func (e *Enumerate) Udev() *Udev {
-	return &Udev{C.udev_enumerate_get_udev(e.ptr)}
+	u := C.udev_enumerate_get_udev(e.ptr)
+	if u != nil {
+		return &Udev{u}
+	}
+	return nil
 }
 
 func (u *Udev) NewEnumerate() *Enumerate {
-	return &Enumerate{C.udev_enumerate_new(u.ptr)}
+	e := C.udev_enumerate_new(u.ptr)
+	if e != nil {
+		return &Enumerate{e}
+	}
+	return nil
 }
 
 func (e *Enumerate) AddMatchSubsystem(subsystem string) error {
@@ -325,16 +368,20 @@ type ListEntry struct {
 	ptr *C.struct_udev_list_entry
 }
 
-func (l *ListEntry) IsNil() bool {
-	return l.ptr == nil
-}
-
 func (l *ListEntry) Next() *ListEntry {
-	return &ListEntry{C.udev_list_entry_get_next(l.ptr)}
+	e := C.udev_list_entry_get_next(l.ptr)
+	if e != nil {
+		return &ListEntry{e}
+	}
+	return nil
 }
 
 func (l *ListEntry) ByName(name string) *ListEntry {
-	return &ListEntry{C.udev_list_entry_get_by_name(l.ptr, C.CString(name))}
+	e := C.udev_list_entry_get_by_name(l.ptr, C.CString(name))
+	if e != nil {
+		return &ListEntry{e}
+	}
+	return nil
 }
 
 func (l *ListEntry) Name() string {
@@ -346,12 +393,24 @@ func (l *ListEntry) Value() string {
 }
 
 func (e *Enumerate) First() *ListEntry {
-	return &ListEntry{C.udev_enumerate_get_list_entry(e.ptr)}
+	l := C.udev_enumerate_get_list_entry(e.ptr)
+	if l != nil {
+		return &ListEntry{l}
+	}
+	return nil
 }
 func (d *Device) FirstDevLinks() *ListEntry {
-	return &ListEntry{C.udev_device_get_devlinks_list_entry(d.ptr)}
+	l := C.udev_device_get_devlinks_list_entry(d.ptr)
+	if l != nil {
+		return &ListEntry{l}
+	}
+	return nil
 }
 
 func (d *Device) FirstProperties() *ListEntry {
-	return &ListEntry{C.udev_device_get_properties_list_entry(d.ptr)}
+	l := C.udev_device_get_properties_list_entry(d.ptr)
+	if l != nil {
+		return &ListEntry{l}
+	}
+	return nil
 }
