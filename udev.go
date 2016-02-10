@@ -48,14 +48,6 @@ func NewUdev() *Udev {
 // 	C.udev_set_log_fn(u.ptr)
 // }
 
-func (u *Udev) GetLogPriority() int {
-	return int(C.udev_get_log_priority(u.ptr))
-}
-
-func (u *Udev) SetLogPriority(priority int) {
-	C.udev_set_log_priority(u.ptr, C.int(priority))
-}
-
 func (u *Udev) GetUserdata() unsafe.Pointer {
 	return C.udev_get_userdata(u.ptr)
 }
@@ -181,7 +173,12 @@ func (m *Monitor) ReceiveDevice() *Device {
 }
 
 func (m *Monitor) AddFilter(subsystem string, devtype string) error {
-	err := C.udev_monitor_filter_add_match_subsystem_devtype(m.ptr, C.CString(subsystem), C.CString(devtype))
+	var err C.int
+	if len(devtype) == 0 {
+		err = C.udev_monitor_filter_add_match_subsystem_devtype(m.ptr, C.CString(subsystem), nil)
+	} else {
+		err = C.udev_monitor_filter_add_match_subsystem_devtype(m.ptr, C.CString(subsystem), C.CString(devtype))
+	}
 	if err == 0 {
 		return nil
 	}
