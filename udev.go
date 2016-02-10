@@ -47,15 +47,7 @@ func NewUdev() *Udev {
 // func (u Udev) SetLogger() {
 // 	C.udev_set_log_fn(u.ptr)
 // }
-/*
-func (u *Udev) GetLogPriority() int {
-	return int(C.udev_get_log_priority(u.ptr))
-}
 
-func (u *Udev) SetLogPriority(priority int) {
-	C.udev_set_log_priority(u.ptr, C.int(priority))
-}
-*/
 func (u *Udev) GetUserdata() unsafe.Pointer {
 	return C.udev_get_userdata(u.ptr)
 }
