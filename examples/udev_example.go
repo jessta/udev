@@ -1,6 +1,6 @@
 package main
 
-import "github.com/jessta/udev"
+import "github.com/mikkeloscar/udev"
 import "os"
 import "fmt"
 

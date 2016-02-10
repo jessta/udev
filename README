@@ -1,1 +1,3 @@
 Go bindings for libudev.
+
+Compatible with latest libudev provided by systemd.
